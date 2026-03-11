@@ -1,0 +1,28 @@
+---
+description: 
+alwaysApply: true
+---
+
+# Project Invariants (Always On)
+
+This repository is benchmark-first, agent-second.
+
+## Scope Lock (v1)
+- Only three task families are in v1:
+  1. severe hyperkalemia response
+  2. severe hypoglycemia response
+  3. sustained hypotension response
+- Reject work that broadens v1 into a generic ICU copilot.
+
+## Non-Negotiable Contract
+- No future leakage.
+- Labels must be deterministic and reproducible.
+- Splits must be reproducible and leakage-safe.
+- Keep protocol-derived gold action labels separate from observed clinician actions.
+- Agent/tool interfaces must be structured and timestamp-bounded.
+- Outputs must be strict, machine-scorable JSON (no vague free text).
+- Claims must stay benchmark-focused and avoid physician-equivalence or deployment claims.
+
+## Enforcement
+- If a requested change violates these invariants, narrow or rewrite the change so the invariants hold.
+- Prefer reproducible benchmark fidelity over feature expansion.

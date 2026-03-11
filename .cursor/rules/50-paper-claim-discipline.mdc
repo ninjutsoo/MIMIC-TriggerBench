@@ -1,0 +1,26 @@
+---
+description: Keep paper claims synchronized with artifacts and benchmark-safe.
+globs:
+  - paper/**
+  - docs/**
+  - src/**
+  - **/*.md
+alwaysApply: false
+---
+
+# Paper and Claim Discipline
+
+Apply when editing paper drafts, docs, benchmark definitions, and claim-bearing source comments/text.
+
+## Synchronization Rules
+- Paper and implementation must stay synchronized.
+- Benchmark definitions, labels, schemas, baselines, and metrics in writing must match actual artifacts.
+
+## Claim Boundaries
+- Do not claim broad clinical reasoning ability.
+- Do not claim deployment readiness.
+- Do not imply physician-level equivalence.
+- Prefer workflow-level claims about evidence retrieval, abstention, action grounding, and structured execution.
+
+## Change Trigger
+- If benchmark semantics change, update paper placeholders and relevant docs in the same workstream.

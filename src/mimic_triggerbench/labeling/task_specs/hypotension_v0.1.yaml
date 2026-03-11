@@ -1,0 +1,90 @@
+spec_version: "v0.1"
+task_name: hypotension
+display_name: "Sustained hypotension"
+description: >
+  Trigger when MAP < 65 mmHg sustained for at least 15 minutes.
+  Aligned with anesthesia quality metric (AQI IIM025) and outcome evidence
+  (Salmasi et al. 2017; Solares et al. 2024) showing organ-injury risk
+  rises sharply after ~13–15 minutes below MAP 65 mmHg.
+
+trigger:
+  signal: map
+  operator: "<"
+  threshold: 65.0
+  unit: "mmHg"
+  sustained_minutes: 15
+  description: >
+    MAP < 65 mmHg sustained for >= 15 minutes.
+    Solares et al. 2024 (HPI/AQI metric); Salmasi et al. 2017 (outcome risk).
+
+exclusions:
+  - name: comfort_measures_only
+    description: "CMO / end-of-life care; aggressive escalation not indicated."
+    how_to_identify: "CMO or palliative-care flags in chart if available."
+  - name: mechanical_circulatory_support
+    description: "Non-pulsatile MCS (LVAD/Impella) makes MAP unreliable."
+    how_to_identify: "Procedure events or chart flags for LVAD, Impella, or ECMO if identifiable."
+
+clustering:
+  washout_minutes: 60
+  description: >
+    After a hypotension trigger fires, do not fire another episode for the
+    same stay until MAP >= 65 has been sustained for at least 60 minutes.
+
+action_window_hours: 1.0
+
+action_families:
+  - name: fluid_bolus
+    description: "Crystalloid fluid bolus for volume resuscitation."
+    concrete_examples:
+      - ">= 250 mL crystalloid in <= 30 min"
+      - "Explicitly labeled 'Bolus' in inputevents"
+    is_primary: true
+  - name: vasopressor_start
+    description: "New vasopressor initiation."
+    concrete_examples:
+      - "Norepinephrine start"
+      - "Vasopressin start"
+      - "Epinephrine start"
+      - "Phenylephrine start"
+      - "Dopamine start"
+    is_primary: true
+  - name: vasopressor_escalation
+    description: "Dose increase of an existing vasopressor."
+    concrete_examples:
+      - "Dose increase > 20% within the action window"
+    is_primary: true
+  - name: repeat_hemodynamic_monitoring
+    description: "Repeat MAP/BP measurement (secondary; insufficient as sole response)."
+    concrete_examples:
+      - "Additional MAP reading"
+    is_primary: false
+
+evidence_types:
+  - name: map_trend
+    lookback_hours: 1
+    required: true
+    description: "MAP values over past 60 minutes."
+  - name: vasopressors
+    lookback_hours: 2
+    required: true
+    description: "Active vasopressor infusions."
+  - name: iv_fluids
+    lookback_hours: 2
+    required: true
+    description: "Recent IV fluids / boluses."
+  - name: lactate
+    lookback_hours: 6
+    required: false
+    description: "Lactate if available."
+  - name: urine_output
+    lookback_hours: 6
+    required: false
+    description: "Urine output for perfusion context."
+
+negative_window:
+  trigger_false_prior_hours: 2.0
+  trigger_false_subsequent_hours: 6.0
+  description: >
+    Candidate time t where MAP >= 65 for the prior 2h and subsequent 6h,
+    preventing near-miss leakage.

@@ -1,0 +1,32 @@
+---
+description: Replay environment and structured tool interface contract.
+globs:
+  - replay/**
+  - tools/**
+  - env/**
+  - tests/**
+alwaysApply: false
+---
+
+# Replay and Tool Contract
+
+Apply when editing replay environment, tool APIs, execution wrappers, and related tests.
+
+## Interface Boundary
+- The replay environment is the only allowed agent interface.
+- Do not allow raw unrestricted table inspection by the agent.
+
+## Tool Requirements
+- Every tool call must be timestamp-bounded (as-of aware).
+- Every tool response must be JSON only.
+- Every response must include:
+  - provenance fields
+  - explicit queried time range
+
+## Safety Requirements
+- Future-data access attempts must be blocked.
+- Add tests that intentionally attempt future access and assert blocking behavior.
+
+## Notes Policy
+- Notes access is off by default.
+- Enable notes only after structured tasks are stable and baseline behavior is validated.

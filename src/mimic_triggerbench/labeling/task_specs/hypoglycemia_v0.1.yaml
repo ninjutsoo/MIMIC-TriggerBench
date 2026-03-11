@@ -1,0 +1,71 @@
+spec_version: "v0.1"
+task_name: hypoglycemia
+display_name: "Severe hypoglycemia (ADA Level 2)"
+description: >
+  Trigger when the latest blood glucose is < 54 mg/dL.
+  ADA Standards of Care 2025 Level 2 hypoglycemia ("clinically important").
+
+trigger:
+  signal: glucose
+  operator: "<"
+  threshold: 54.0
+  unit: "mg/dL"
+  description: >
+    Glucose < 54 mg/dL (ADA Level 2, clinically important hypoglycemia).
+    ADA Standards of Care in Diabetes, 2025.
+
+exclusions:
+  - name: comfort_measures_only
+    description: "CMO / end-of-life care; aggressive escalation not indicated."
+    how_to_identify: "CMO or palliative-care flags in chart if available."
+
+action_window_hours: 1.0
+
+action_families:
+  - name: iv_dextrose
+    description: "IV dextrose bolus for acute correction."
+    concrete_examples:
+      - "D50 amp (25g dextrose IV)"
+      - "D10 bolus >= 10g IV"
+    is_primary: true
+  - name: glucagon
+    description: "Glucagon IM or IV."
+    concrete_examples:
+      - "Glucagon 1mg IM"
+      - "Glucagon 1mg IV"
+    is_primary: true
+  - name: correction_documented
+    description: "Correction documented in medication/administration record."
+    concrete_examples:
+      - "Oral glucose if patient is conscious and able to swallow"
+    is_primary: true
+  - name: repeat_glucose
+    description: "Repeat glucose measurement (secondary; insufficient as sole treatment)."
+    concrete_examples:
+      - "Repeat blood glucose within 15–30 minutes"
+    is_primary: false
+
+evidence_types:
+  - name: glucose_trend
+    lookback_hours: 6
+    required: true
+    description: "Recent glucose values."
+  - name: insulin_administration
+    lookback_hours: 6
+    required: true
+    description: "Insulin given (possible precipitant)."
+  - name: dextrose_glucagon
+    lookback_hours: 2
+    required: true
+    description: "Recent dextrose or glucagon."
+  - name: nutrition_infusions
+    lookback_hours: 6
+    required: false
+    description: "Nutrition or dextrose infusions if available."
+
+negative_window:
+  trigger_false_prior_hours: 2.0
+  trigger_false_subsequent_hours: 6.0
+  description: >
+    Candidate time t where glucose >= 54 mg/dL for the prior 2h and
+    subsequent 6h, preventing near-miss leakage.

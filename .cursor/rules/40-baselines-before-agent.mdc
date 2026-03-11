@@ -1,0 +1,34 @@
+---
+description: Enforce baseline completeness and shared benchmark contract before agent expansion.
+globs:
+  - baselines/**
+  - agents/**
+  - eval/**
+  - configs/**
+alwaysApply: false
+---
+
+# Baselines Before Agent
+
+Apply when editing baselines, agent logic, evaluation, or experiment configs.
+
+## Ordering Constraint
+- Do not add agent complexity before runnable baselines exist and are evaluated.
+
+## Required Baselines
+- rule baseline
+- tabular ML baseline
+- single-pass LLM baseline
+- simple RAG baseline
+
+## Shared Contract
+- All systems must emit the same final strict JSON schema.
+- No free-form benchmark outputs.
+- Evaluation must score workflow behavior, not only final prediction quality.
+
+## New Agent Feature Gate
+Every new agent feature must state:
+- which benchmark failure mode it addresses
+- which baseline it should beat
+- which metric should show gain
+- which ablation isolates its contribution

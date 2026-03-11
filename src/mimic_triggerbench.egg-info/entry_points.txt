@@ -1,0 +1,2 @@
+[console_scripts]
+mimic-triggerbench = mimic_triggerbench.cli:main

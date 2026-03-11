@@ -1,0 +1,3 @@
+# check-implement
+
+You go to @IMPLEMENTATION_TASKS.md and fully verify if everything for the requested part is done properly, run existing test files, and then design and run your own **additional, temporary tests** that use **different testing methods** than the existing ones (e.g., different inputs, edge cases, or strategies). Compare the results of your temporary tests against the existing tests to make sure everything is smooth and 100% verified. Generate a short bulleted report at the end, and if anything is there that needs information from my side, ask me and 100% confirm completion. Make sure to remove any temporary test files at the end and cleanup.

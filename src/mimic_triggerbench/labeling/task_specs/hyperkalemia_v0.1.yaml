@@ -1,0 +1,95 @@
+spec_version: "v0.1"
+task_name: hyperkalemia
+display_name: "Moderate-to-severe hyperkalemia (clinically important)"
+description: >
+  Trigger when the latest serum potassium is >= 6.0 mmol/L.
+  Threshold captures the moderate-to-severe range per UK Kidney Association
+  2023 guidance (mild 5.5–5.9, moderate 6.0–6.4, severe >= 6.5 mmol/L).
+
+trigger:
+  signal: potassium
+  operator: ">="
+  threshold: 6.0
+  unit: "mmol/L"
+  description: >
+    K >= 6.0 mmol/L (moderate-to-severe, clinically important).
+    UK Kidney Association 2023; UKKA defines severe as >= 6.5 mmol/L.
+
+exclusions:
+  - name: chronic_dialysis
+    description: "Patient on maintenance RRT / ESRD prior to admission."
+    how_to_identify: "ICD codes for ESRD (N18.6) or procedure codes for chronic dialysis before ICU admission."
+  - name: comfort_measures_only
+    description: "CMO / end-of-life care; aggressive escalation not indicated."
+    how_to_identify: "CMO or palliative-care flags in chart if available."
+  - name: hemolyzed_specimen
+    description: "Pseudo-hyperkalemia from hemolysis artifact."
+    how_to_identify: "Lab comment flags for hemolysis if recorded in labevents."
+
+action_window_hours: 6.0
+
+action_families:
+  - name: calcium_administration
+    description: "IV calcium to stabilise cardiac membrane."
+    concrete_examples:
+      - "IV calcium gluconate > 1g"
+      - "IV calcium chloride > 0.5g"
+    is_primary: true
+  - name: insulin_dextrose
+    description: "Insulin + dextrose to shift K intracellularly."
+    concrete_examples:
+      - "IV regular insulin 10u + IV dextrose >= 25g (e.g. D50 amp)"
+    is_primary: true
+  - name: bicarbonate_iv
+    description: "IV sodium bicarbonate."
+    concrete_examples:
+      - "IV sodium bicarbonate infusion"
+    is_primary: true
+  - name: potassium_lowering_therapy
+    description: "Other K-lowering agents."
+    concrete_examples:
+      - "Nebulized albuterol 10-20mg"
+      - "Sodium polystyrene sulfonate"
+      - "Patiromer"
+      - "Sodium zirconium cyclosilicate"
+    is_primary: true
+  - name: dialysis
+    description: "New RRT initiation for acute K removal."
+    concrete_examples:
+      - "CRRT initiation"
+      - "Intermittent hemodialysis initiation"
+    is_primary: true
+  - name: repeat_potassium
+    description: "Repeat lab measurement (secondary; insufficient as sole treatment label)."
+    concrete_examples:
+      - "Repeat serum potassium order"
+    is_primary: false
+
+evidence_types:
+  - name: potassium_values
+    lookback_hours: 24
+    required: true
+    description: "Recent potassium trend."
+  - name: creatinine_bun
+    lookback_hours: 24
+    required: true
+    description: "Renal function context."
+  - name: k_lowering_meds
+    lookback_hours: 6
+    required: true
+    description: "Recent insulin, dextrose, calcium, bicarbonate, K-binders."
+  - name: dialysis_procedures
+    lookback_hours: 12
+    required: false
+    description: "Dialysis / procedure indicators."
+  - name: urine_output
+    lookback_hours: 12
+    required: false
+    description: "Urine output for severity context."
+
+negative_window:
+  trigger_false_prior_hours: 2.0
+  trigger_false_subsequent_hours: 6.0
+  description: >
+    Candidate time t where K < 6.0 for the prior 2h and subsequent 6h,
+    preventing near-miss leakage.

@@ -1,0 +1,34 @@
+---
+description: Guardrails for data, timeline, labeling, splits, and integrity tests.
+globs:
+  - data_access/**
+  - labels/**
+  - timeline/**
+  - splits/**
+  - tests/**
+alwaysApply: false
+---
+
+# Data and Label Integrity
+
+Apply when editing data ingestion, normalization, timeline, label generation, split logic, or their tests.
+
+## Required Guarantees
+- Preserve provenance from raw source through canonical events and labels.
+- Enforce strict as-of-time slicing for all derived features and episode context.
+- Keep these artifacts strictly separate:
+  - trigger labels
+  - observed clinician actions
+  - protocol-derived gold actions
+- Fail loudly on ambiguous mappings or timestamps; no silent fallback/default mapping.
+
+## Required Tests
+- Leakage tests (future access attempts fail).
+- Schema stability tests for core benchmark artifacts.
+- Split safety tests proving patient-level leakage prevention.
+
+## Change Discipline
+- If episode semantics, trigger logic, or action mapping changes:
+  - update relevant docs
+  - update audit artifacts
+  - regenerate or revalidate affected outputs
