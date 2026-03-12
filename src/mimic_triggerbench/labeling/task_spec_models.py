@@ -93,6 +93,13 @@ class NegativeWindowDef(BaseModel):
         ..., gt=0,
         description="Trigger must remain false for this many hours after (avoids near-miss leakage).",
     )
+    visibility_scope: Literal["label_generation_only"] = Field(
+        ...,
+        description=(
+            "Must remain 'label_generation_only' to guarantee future-looking "
+            "negative-window logic is not exposed to replay tools or agents."
+        ),
+    )
     description: str = ""
 
     model_config = ConfigDict(frozen=True)

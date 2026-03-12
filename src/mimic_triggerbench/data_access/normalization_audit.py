@@ -13,11 +13,12 @@ from pathlib import Path
 from typing import Iterable, Optional
 
 import pandas as pd
+import pyarrow.parquet as pq
 
 from mimic_triggerbench.config import DataBackend, Settings
+from mimic_triggerbench.mimic_tables import TABLE_SPECS, resolve_table_path
 
 from .codebook_loader import load_all_codebooks
-from .inventory import REQUIRED_TABLE_FILES
 from .normalizer import Normalizer
 
 
@@ -32,31 +33,38 @@ class TableScanResult:
     top_unmapped_labels: list[tuple[str, int]]
 
 
-_FILE_REL_BY_TABLE = {
-    "labevents": "hosp/labevents.csv.gz",
-    "chartevents": "icu/chartevents.csv.gz",
-    "inputevents": "icu/inputevents.csv.gz",
-    "procedureevents": "icu/procedureevents.csv.gz",
-    "prescriptions": "hosp/prescriptions.csv.gz",
-    "emar": "hosp/emar.csv.gz",
-}
+_AUDIT_TABLES = ("labevents", "chartevents", "inputevents", "procedureevents", "prescriptions", "emar")
 
 
-def _resolve_file_path(settings: Settings, rel: str) -> Path:
+def _resolve_file_path(settings: Settings, table: str) -> tuple[Path, str]:
     if settings.mimic_root is None:
         raise ValueError("Settings.mimic_root is required for file backend.")
-    return Path(settings.mimic_root) / rel
+    resolved = resolve_table_path(Path(settings.mimic_root), table)
+    if resolved is None:
+        spec = TABLE_SPECS[table]
+        raise FileNotFoundError(
+            f"{table}: no table file found under {settings.mimic_root!s}; "
+            f"tried {', '.join(spec.candidate_paths)}"
+        )
+    return resolved.path, resolved.file_format
 
 
-def _read_first_rows(path: Path, usecols: Iterable[str], nrows: int) -> pd.DataFrame:
+def _read_first_rows(path: Path, file_format: str, usecols: Iterable[str], nrows: int) -> pd.DataFrame:
     # We intentionally read only the first nrows for speed and determinism.
+    if file_format == "parquet":
+        df = pd.read_parquet(path, columns=list(usecols))
+        return df.head(nrows)
     return pd.read_csv(path, compression="infer", usecols=list(usecols), nrows=nrows)
 
 
-def _cols_present(path: Path, candidates: list[str]) -> list[str]:
+def _cols_present(path: Path, file_format: str, candidates: list[str]) -> list[str]:
     # Read only the header row to see which columns exist.
-    header = pd.read_csv(path, compression="infer", nrows=0)
-    present = [c for c in candidates if c in header.columns]
+    if file_format == "parquet":
+        present_cols = set(pq.ParquetFile(path).schema.names)
+    else:
+        header = pd.read_csv(path, compression="infer", nrows=0)
+        present_cols = set(header.columns)
+    present = [c for c in candidates if c in present_cols]
     return present
 
 
@@ -67,17 +75,14 @@ def _scan_table_files_backend(
     max_rows: int,
     top_k: int,
 ) -> TableScanResult:
-    rel = _FILE_REL_BY_TABLE[table]
-    path = _resolve_file_path(settings, rel)
-    if not path.exists():
-        raise FileNotFoundError(path)
+    path, file_format = _resolve_file_path(settings, table)
 
     if table in {"labevents", "chartevents", "inputevents", "procedureevents"}:
         candidates = ["itemid", "label", "valuenum", "valueuom", "amount", "amountuom", "rate", "rateuom"]
-        cols = _cols_present(path, candidates)
+        cols = _cols_present(path, file_format, candidates)
         if "itemid" not in cols:
             raise ValueError(f"{table}: expected 'itemid' column in {path}")
-        df = _read_first_rows(path, cols, nrows=max_rows)
+        df = _read_first_rows(path, file_format, cols, nrows=max_rows)
 
         for row in df.itertuples(index=False):
             itemid = getattr(row, "itemid", None)
@@ -107,10 +112,10 @@ def _scan_table_files_backend(
 
     if table in {"prescriptions", "emar"}:
         candidates = ["drug", "medication", "medication_name", "medication_description", "drug_name"]
-        cols = _cols_present(path, candidates)
+        cols = _cols_present(path, file_format, candidates)
         if not cols:
             raise ValueError(f"{table}: expected a drug/medication text column in {path}")
-        df = _read_first_rows(path, cols, nrows=max_rows)
+        df = _read_first_rows(path, file_format, cols, nrows=max_rows)
         col = cols[0]
         for v in df[col].astype("string").fillna("").tolist():
             label = str(v)
@@ -145,7 +150,7 @@ def scan_normalization_coverage(
     overall unmapped rate will be high until codebooks are expanded.
     """
     if tables is None:
-        tables = list(_FILE_REL_BY_TABLE.keys())
+        tables = list(_AUDIT_TABLES)
 
     codebooks = load_all_codebooks()
     normalizer = Normalizer(codebooks)
@@ -224,4 +229,3 @@ def write_normalization_coverage_report(
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text("\n".join(lines), encoding="utf-8")
-

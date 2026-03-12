@@ -85,6 +85,7 @@ evidence_types:
 negative_window:
   trigger_false_prior_hours: 2.0
   trigger_false_subsequent_hours: 6.0
+  visibility_scope: label_generation_only
   description: >
     Candidate time t where MAP >= 65 for the prior 2h and subsequent 6h,
     preventing near-miss leakage.

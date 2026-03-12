@@ -100,6 +100,12 @@ def test_negative_windows_present() -> None:
         spec = load_task_spec(task)
         assert spec.negative_window.trigger_false_prior_hours == 2.0
         assert spec.negative_window.trigger_false_subsequent_hours == 6.0
+        assert spec.negative_window.visibility_scope == "label_generation_only"
+        # Future-looking negative-window conditions are allowed for sampling,
+        # but must remain internal to label generation / episode construction
+        # and never appear in replay tools or agent-visible episode context.
+        assert spec.negative_window.trigger_false_prior_hours > 0
+        assert spec.negative_window.trigger_false_subsequent_hours > 0
 
 
 def test_all_specs_have_at_least_one_primary_action() -> None:
@@ -169,6 +175,20 @@ def test_reject_negative_lookback() -> None:
 def test_reject_missing_negative_window() -> None:
     raw = _raw_yaml("hypotension")
     del raw["negative_window"]
+    with pytest.raises(ValidationError):
+        TaskSpec.model_validate(raw)
+
+
+def test_reject_missing_negative_window_visibility_scope() -> None:
+    raw = _raw_yaml("hypotension")
+    del raw["negative_window"]["visibility_scope"]
+    with pytest.raises(ValidationError):
+        TaskSpec.model_validate(raw)
+
+
+def test_reject_bad_negative_window_visibility_scope() -> None:
+    raw = _raw_yaml("hypotension")
+    raw["negative_window"]["visibility_scope"] = "agent_visible"
     with pytest.raises(ValidationError):
         TaskSpec.model_validate(raw)
 

@@ -6,27 +6,9 @@ from typing import Optional
 
 from dotenv import load_dotenv
 
-from .settings import DataBackend, Settings
+from mimic_triggerbench.mimic_tables import iter_table_specs, resolve_table_path
 
-# Keep this list local to avoid import cycles between config and data_access.
-# It must stay in sync with `mimic_triggerbench.data_access.inventory.REQUIRED_TABLE_FILES`.
-_REQUIRED_TABLE_FILES = [
-    # ICU module
-    "icu/icustays.csv.gz",
-    "icu/chartevents.csv.gz",
-    "icu/inputevents.csv.gz",
-    "icu/outputevents.csv.gz",
-    "icu/procedureevents.csv.gz",
-    # Hospital module
-    "hosp/admissions.csv.gz",
-    "hosp/patients.csv.gz",
-    "hosp/labevents.csv.gz",
-    "hosp/prescriptions.csv.gz",
-    "hosp/emar.csv.gz",
-    "hosp/pharmacy.csv.gz",
-    "hosp/transfers.csv.gz",
-    "hosp/diagnoses_icd.csv.gz",
-]
+from .settings import DataBackend, Settings
 
 
 def _get_path(var_name: str) -> Optional[Path]:
@@ -37,14 +19,15 @@ def _get_path(var_name: str) -> Optional[Path]:
 
 
 def _has_required_files(mimic_root: Path) -> bool:
-    return all((mimic_root / rel).exists() for rel in _REQUIRED_TABLE_FILES)
+    return all(resolve_table_path(mimic_root, spec.table_name) is not None for spec in iter_table_specs())
 
 
 def _discover_repo_mimic_root() -> Path | None:
     """Discover a repo-local MIMIC root when present.
 
-    Expected local layout (mirrors PhysioNet download structure):
-    - <repo>/physionet.org/files/mimiciv/<version>/{icu,hosp}/*.csv.gz
+    Expected local layout (mirrors PhysioNet download structure), with
+    table files available as .parquet, .csv.gz, or .csv:
+    - <repo>/physionet.org/files/mimiciv/<version>/{icu,hosp}/*
     """
     # config/ is <repo>/src/mimic_triggerbench/config
     repo_root = Path(__file__).resolve().parents[3]
@@ -105,4 +88,3 @@ def load_settings(dotenv_path: str | Path | None = ".env") -> Settings:
         raise ValueError("POSTGRES_DSN is required when MIMIC_BACKEND=postgres")
 
     return settings
-

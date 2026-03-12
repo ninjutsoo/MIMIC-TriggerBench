@@ -40,16 +40,16 @@ The project must not drift into a generic ICU copilot in v1.
 Baselines must run before expanding agent complexity.
 
 ## Agent Architecture Contract
-Recommended constrained 4-module pipeline:
-- planner
-- retriever/executor
-- verifier
-- reporter
+Recommended constrained, bounded pipeline:
+- planner (decides which tool to call next and when to stop),
+- retriever/executor (deterministic Python dispatcher over structured tools),
+- verifier (deterministic safety/consistency checks and abstention logic),
+- reporter (emits final JSON only, no narrative free text).
 
-This pipeline must remain bounded, structured, and benchmark-driven.
+In code, this should be implemented as a **single bounded agent loop plus a deterministic verifier**, not as a large orchestration framework. Use direct Gemini API/SDK calls, pydantic models, a small Python tool dispatcher, and structured logging. LangChain or similar heavy agent frameworks are **out of scope for v1** unless a concrete, benchmark-driven need is identified later.
 
 ## Output Schema Contract
-All systems (baselines and agent) must emit the same strict final JSON schema. No free-form benchmark outputs are allowed as primary outputs.
+All systems (baselines and agent) must emit the same strict final JSON schema, frozen **before** replay tools, baselines, or agent runs are implemented. No free-form benchmark outputs are allowed as primary outputs. Schema validation must be wired into all runners so malformed outputs fail loudly.
 
 ## Notes Policy
 Start with structured data only. Notes are off by default and may be introduced later as an explicit ablation/extension after structured tasks are stable.

@@ -22,9 +22,11 @@ This checklist must be complete and unambiguous. If the doc is vague, tighten it
 
 ## Step 2 — Map checklist items to concrete verification methods (mandatory)
 For each checklist item, specify at least one verification method:
-- existing test(s) that cover it (preferred when adequate), or
+- existing test(s) that cover it (you may reuse these, but they are **never sufficient by themselves** for this command), or
 - a new **throwaway** test that covers it, or
 - an end-to-end CLI run / public-interface run that asserts outputs + invariants.
+
+In addition to mapping items individually, you **must plan for at least one single temporary test file** that exercises the **entire contract together** for the scoped section (end-to-end through public interfaces). You are not allowed to conclude that implementation is adequate based only on scattered existing tests.
 
 Avoid “unit-test-only” verification when the contract is end-to-end. Prefer testing through the **public interfaces** used by the benchmark (CLI, data access layer entrypoints, normalizer APIs, etc.).
 
@@ -39,6 +41,11 @@ When a repo-local MIMIC mirror exists (for example `physionet.org/files/mimiciv/
 
 ## Step 4 — Create throwaway real-data tests (mandatory)
 Create additional **temporary test files** designed specifically to validate the checklist items that are not already strongly covered.
+
+You **must** include at least **one dedicated temporary test file** that:
+- lives in a single file (even if it calls helpers),
+- exercises the scoped section’s behavior **end-to-end** through public interfaces (CLI or primary APIs),
+- asserts something that can only pass if the key pieces of that section are working **together**, not just in isolation.
 
 Hard requirements for these temporary tests:
 - They must exercise code through **public interfaces end-to-end** whenever possible.

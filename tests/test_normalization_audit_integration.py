@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 
 from mimic_triggerbench.config import DataBackend, Settings, load_settings
-from mimic_triggerbench.data_access.inventory import REQUIRED_TABLE_FILES
+from mimic_triggerbench.mimic_tables import iter_table_specs, resolve_table_path
 from mimic_triggerbench.data_access.normalization_audit import (
     scan_normalization_coverage,
     write_normalization_coverage_report,
@@ -22,14 +22,14 @@ from mimic_triggerbench.data_access.normalization_audit import (
 
 
 def _has_required_files(mimic_root: Path) -> bool:
-    return all((mimic_root / rel).exists() for rel in REQUIRED_TABLE_FILES)
+    return all(resolve_table_path(mimic_root, spec.table_name) is not None for spec in iter_table_specs())
 
 
 def _discover_repo_mimic_root() -> Path | None:
     """Discover a repo-local MIMIC root if present.
 
     Expected local layout (mirrors PhysioNet download structure):
-    - <repo>/physionet.org/files/mimiciv/<version>/{icu,hosp}/*.csv.gz
+    - <repo>/physionet.org/files/mimiciv/<version>/{icu,hosp}/*.{parquet,csv.gz,csv}
     """
     repo_root = Path(__file__).resolve().parents[1]
     base = repo_root / "physionet.org" / "files" / "mimiciv"
@@ -84,4 +84,3 @@ def test_normalization_audit_runs_on_local_data(tmp_path: Path) -> None:
     text = out.read_text(encoding="utf-8")
     assert "Normalization coverage" in text
     assert "Top unmapped" in text
-

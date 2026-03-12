@@ -1,0 +1,43 @@
+source_table,source_identifier,source_label,mapping_decision,canonical_concept,source_unit,target_unit,conversion_factor,conversion_offset,loinc_code,rxnorm_code,snomed_code,source_frequency_count,unit_frequency_summary,review_status,review_note
+labevents,50971,Potassium,map_convert_unit,potassium,mEq/L,mmol/L,1.0,0.0,2823-3,,,3150261,mEq/L:3150261,validated,Primary serum potassium mapping validated.
+labevents,50822,"Potassium, Whole Blood",map_convert_unit,potassium,mEq/L,mmol/L,1.0,0.0,6298-4,,,247306,mEq/L:247306,validated,Whole-blood potassium retained for trigger support.
+labevents,50931,Glucose,map_convert_unit,glucose,mmol/L,mg/dL,18.016,0.0,2345-7,,,3930000,mmol/L:3930000,validated,Converted to mg/dL for unified trigger logic.
+labevents,50809,"Glucose, Whole Blood",map_convert_unit,glucose,mmol/L,mg/dL,18.016,0.0,14749-6,,,205000,mmol/L:205000,validated,Whole-blood glucose converted to mg/dL.
+labevents,50912,Creatinine,map_convert_unit,creatinine,umol/L,mg/dL,0.0113,0.0,2160-0,,,1820000,umol/L:1820000,validated,Conversion needed for mixed-unit charting.
+labevents,51006,Urea Nitrogen,map_as_is,bun,,mg/dL,,,,,1890000,mg/dL:1890000,validated,BUN mapped as-is.
+labevents,50813,Lactate,map_as_is,lactate,,mmol/L,,,,,1240000,mmol/L:1240000,validated,Lactate mapped as-is.
+chartevents,220052,Arterial Blood Pressure mean,map_as_is,map,,mmHg,,,,,49000000,mmHg:49000000,validated,Invasive MAP source.
+chartevents,220181,Non Invasive Blood Pressure mean,map_as_is,map,,mmHg,,,,,25000000,mmHg:25000000,validated,Non-invasive MAP source.
+chartevents,225312,ART BP mean,map_as_is,map,,mmHg,,,,,1200000,mmHg:1200000,pending,Site-specific arterial MAP alias.
+chartevents,220050,Arterial Blood Pressure systolic,map_as_is,systolic_bp,,mmHg,,,,,42000000,mmHg:42000000,validated,Optional context signal.
+chartevents,220179,Non Invasive Blood Pressure systolic,map_as_is,systolic_bp,,mmHg,,,,,31000000,mmHg:31000000,validated,Optional context signal.
+chartevents,220045,Heart Rate,map_as_is,heart_rate,,bpm,,,,,63000000,bpm:63000000,validated,Optional context signal.
+inputevents,221456,Calcium Gluconate,map_convert_unit,calcium_gluconate,mg,g,0.001,0.0,,1668247,,65073,mg:65073,validated,Normalized to grams.
+inputevents,227525,Calcium Chloride,map_convert_unit,calcium_chloride,mg,g,0.001,0.0,,1767605,,9200,mg:9200,pending,Normalized to grams; review local prevalence.
+inputevents,223257,Insulin - Regular,map_as_is,insulin_regular,,units,,,,,51000,units:51000,validated,Regular insulin itemid retained.
+inputevents,223258,Insulin - Regular,map_as_is,insulin_regular,,units,,,,,337446,units:337446,validated,Includes drip and push contexts.
+inputevents,223259,Insulin - NPH,map_as_is,insulin_regular,,units,,,,,10718,units:10718,pending,Included for broader insulin context.
+inputevents,223260,Insulin - Glargine,map_as_is,insulin_regular,,units,,,,,37251,units:37251,pending,Included for broader insulin context.
+inputevents,223261,Insulin - Aspart,map_as_is,insulin_regular,,units,,,,,26000,units:26000,pending,Included for broader insulin context.
+inputevents,223262,Insulin - Humalog,map_as_is,insulin_regular,,units,,,,,97298,units:97298,validated,Rapid-acting insulin retained.
+inputevents,220949,Dextrose 5,map_as_is,dextrose,,mL,,,,,140000,mL:140000,pending,May include maintenance and treatment contexts.
+inputevents,220950,Dextrose 10,map_as_is,dextrose,,mL,,,,,210000,mL:210000,pending,Used in hypoglycemia and infusion contexts.
+inputevents,220952,Dextrose 50,map_as_is,dextrose,,mL,,,,,82000,mL:82000,validated,Bolus treatment context.
+inputevents,220995,Sodium Bicarbonate,map_as_is,sodium_bicarbonate,,mEq,,,,,58000,mEq:58000,validated,Hyperkalemia action-family source.
+prescriptions,label:Kayexalate*,Kayexalate*,map_as_is,potassium_binder,,g,,,,,14000,text:14000,validated,Label-pattern mapping for oral potassium binder.
+prescriptions,label:Albuterol*,Albuterol*,map_as_is,albuterol_nebulized,,mg,,,,,28000,text:28000,pending,Needs route-aware filtering downstream.
+prescriptions,label:Glucagon*,Glucagon*,map_as_is,glucagon,,mg,,,,,2200,text:2200,validated,Severe hypoglycemia rescue medication.
+inputevents,221906,Norepinephrine,map_as_is,norepinephrine,,mcg/kg/min,,0.0,,1745276,,459800,mcg/kg/min:459798|mg/kg/min:2,validated,Primary vasopressor source.
+inputevents,222315,Vasopressin,map_as_is,vasopressin,,units/min,,0.0,,222315,,37163,units/hour:37160|units/min:3,validated,Rate normalization handled downstream.
+inputevents,221289,Epinephrine,map_as_is,epinephrine,,mcg/kg/min,,0.0,,221289,,31495,mcg/kg/min:31495,validated,Vasopressor source.
+inputevents,221749,Phenylephrine,map_as_is,phenylephrine,,mcg/min,,0.0,,221749,,209376,mcg/kg/min:209374|mcg/min:2,validated,Vasopressor source with mixed rate units.
+inputevents,221662,Dopamine,map_as_is,dopamine,,mcg/kg/min,,0.0,,221662,,18085,mcg/kg/min:18085,validated,Vasopressor source.
+inputevents,225158,NaCl 0.9,map_as_is,crystalloid_bolus,,mL,,,,,310000,mL:310000,pending,Bolus vs maintenance resolved by downstream detector.
+inputevents,225828,Lactated Ringer,map_as_is,crystalloid_bolus,,mL,,,,,185000,mL:185000,pending,Bolus vs maintenance resolved by downstream detector.
+inputevents,225159,NaCl 0.45,map_as_is,crystalloid_bolus,,mL,,,,,54000,mL:54000,pending,Bolus vs maintenance resolved by downstream detector.
+procedureevents,225802,Dialysis - CRRT,map_as_is,crrt,,,,,,,12000,event:12000,validated,CRRT start candidate.
+procedureevents,225803,Dialysis - CVVHD,map_as_is,crrt,,,,,,,9500,event:9500,validated,CRRT modality start candidate.
+procedureevents,225809,Dialysis - CVVHDF,map_as_is,crrt,,,,,,,6300,event:6300,validated,CRRT modality start candidate.
+procedureevents,225436,Hemodialysis,map_as_is,hemodialysis,,,,,,,7400,event:7400,validated,Intermittent HD candidate.
+labevents,51069,"Albumin, Urine",no_mapping,,,,,,,,56977,mg/dL:56977,validated,Urine chemistry excluded from target lab concepts.
+chartevents,224145,Heparin Dose (per hour),unsure,,,,,,,,181081,units/hour:181081,needs_review,May represent dialysis-related heparin dosing; not mapped for v0.1.
