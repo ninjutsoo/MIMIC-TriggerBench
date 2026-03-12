@@ -1,0 +1,44 @@
+name: vitals
+version: "v0.1"
+description: >
+  Canonical vital sign / hemodynamic mappings from MIMIC-IV chartevents.
+  Source: MIMIC-IV chartevents (d_items reference, MetaVision only).
+
+entries:
+  - canonical_name: map
+    description: "Mean arterial pressure (invasive and non-invasive)."
+    source_tables: [chartevents]
+    raw_itemids: [220052, 220181, 225312]
+    raw_labels:
+      - "Arterial Blood Pressure mean"
+      - "Non Invasive Blood Pressure mean"
+      - "ART BP mean"
+    canonical_unit: "mmHg"
+    conversions: []
+    ambiguity_notes:
+      - "220052 is invasive (arterial line); 220181 is non-invasive (cuff). Both valid for MAP trigger."
+      - "225312 is an alternative arterial BP mean itemid in some MIMIC-IV installations."
+    is_ambiguous: false
+
+  - canonical_name: systolic_bp
+    description: "Systolic blood pressure (optional supporting context)."
+    source_tables: [chartevents]
+    raw_itemids: [220050, 220179]
+    raw_labels:
+      - "Arterial Blood Pressure systolic"
+      - "Non Invasive Blood Pressure systolic"
+    canonical_unit: "mmHg"
+    conversions: []
+    ambiguity_notes: []
+    is_ambiguous: false
+
+  - canonical_name: heart_rate
+    description: "Heart rate (optional supporting context)."
+    source_tables: [chartevents]
+    raw_itemids: [220045]
+    raw_labels:
+      - "Heart Rate"
+    canonical_unit: "bpm"
+    conversions: []
+    ambiguity_notes: []
+    is_ambiguous: false

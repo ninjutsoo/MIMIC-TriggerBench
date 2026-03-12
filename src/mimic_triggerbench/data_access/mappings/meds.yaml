@@ -1,0 +1,217 @@
+name: meds
+version: "v0.1"
+description: >
+  Canonical medication and fluid mappings for benchmark action families.
+  Sources: MIMIC-IV inputevents (d_items itemids), prescriptions (drug text),
+  emar (medication text).  Wildcard patterns use '*' (fnmatch syntax).
+
+entries:
+  # --- Hyperkalemia action families ---
+
+  - canonical_name: calcium_gluconate
+    description: "IV calcium gluconate for cardiac membrane stabilization."
+    source_tables: [inputevents, prescriptions, emar]
+    raw_itemids: [221456]
+    raw_labels:
+      - "Calcium Gluconate"
+      - "Calcium Gluconate*"
+    canonical_unit: "g"
+    conversions:
+      - from_unit: "mg"
+        factor: 0.001
+    ambiguity_notes:
+      - "Verify itemid against local d_items; numbering may vary across MIMIC-IV versions."
+    is_ambiguous: true
+
+  - canonical_name: calcium_chloride
+    description: "IV calcium chloride for cardiac membrane stabilization."
+    source_tables: [inputevents, prescriptions, emar]
+    raw_itemids: [227525]
+    raw_labels:
+      - "Calcium Chloride"
+      - "Calcium Chloride*"
+    canonical_unit: "g"
+    conversions:
+      - from_unit: "mg"
+        factor: 0.001
+    ambiguity_notes:
+      - "Verify itemid against local d_items; numbering may vary across MIMIC-IV versions."
+    is_ambiguous: true
+
+  - canonical_name: insulin_regular
+    description: "Regular/rapid-acting insulin (hyperkalemia shift therapy or glucose management)."
+    source_tables: [inputevents, prescriptions, emar]
+    raw_itemids: [223257, 223258, 223259, 223260, 223261, 223262]
+    raw_labels:
+      - "Insulin - Regular"
+      - "Insulin - Humalog"
+      - "Insulin - Novolog"
+      - "Insulin - Glargine"
+      - "Insulin - NPH"
+      - "Insulin*"
+      - "Regular Insulin*"
+    canonical_unit: "units"
+    conversions: []
+    ambiguity_notes:
+      - "223257 is Regular insulin (most relevant for hyperkalemia). Others included for completeness."
+      - "For hyperkalemia action labeling, only regular/rapid-acting insulin should count."
+    is_ambiguous: false
+
+  - canonical_name: dextrose
+    description: "IV dextrose for hypoglycemia treatment or insulin-dextrose protocol."
+    source_tables: [inputevents, prescriptions, emar]
+    raw_itemids: [220949, 220950, 220952]
+    raw_labels:
+      - "Dextrose 5*"
+      - "Dextrose 10*"
+      - "Dextrose 50*"
+      - "D5W*"
+      - "D10*"
+      - "D50*"
+      - "Dextrose*"
+    canonical_unit: "mL"
+    conversions: []
+    ambiguity_notes:
+      - "D5W as maintenance fluid vs D50 as treatment bolus have very different clinical intent."
+      - "Downstream labeling must distinguish bolus treatment from maintenance infusion."
+    is_ambiguous: false
+
+  - canonical_name: sodium_bicarbonate
+    description: "IV sodium bicarbonate."
+    source_tables: [inputevents, prescriptions, emar]
+    raw_itemids: [220995]
+    raw_labels:
+      - "Sodium Bicarbonate"
+      - "Sodium Bicarbonate*"
+      - "NaHCO3*"
+    canonical_unit: "mEq"
+    conversions: []
+    ambiguity_notes: []
+    is_ambiguous: false
+
+  - canonical_name: potassium_binder
+    description: "Potassium-binding resins and newer oral/rectal binders."
+    source_tables: [prescriptions, emar]
+    raw_itemids: []
+    raw_labels:
+      - "Sodium Polystyrene Sulfonate*"
+      - "Kayexalate*"
+      - "Patiromer*"
+      - "Veltassa*"
+      - "Sodium Zirconium Cyclosilicate*"
+      - "Lokelma*"
+    canonical_unit: "g"
+    conversions: []
+    ambiguity_notes:
+      - "Binders are oral/rectal; unlikely in inputevents. Check prescriptions and emar."
+    is_ambiguous: false
+
+  - canonical_name: albuterol_nebulized
+    description: "Nebulized albuterol for intracellular potassium shift."
+    source_tables: [prescriptions, emar]
+    raw_itemids: []
+    raw_labels:
+      - "Albuterol*"
+      - "Salbutamol*"
+    canonical_unit: "mg"
+    conversions: []
+    ambiguity_notes:
+      - "Distinguish nebulized from MDI; nebulized doses (10-20 mg) are used for hyperkalemia."
+    is_ambiguous: true
+
+  # --- Hypoglycemia action families ---
+
+  - canonical_name: glucagon
+    description: "Glucagon for severe hypoglycemia."
+    source_tables: [inputevents, prescriptions, emar]
+    raw_itemids: []
+    raw_labels:
+      - "Glucagon*"
+      - "GlucaGen*"
+    canonical_unit: "mg"
+    conversions: []
+    ambiguity_notes:
+      - "Glucagon may not have a dedicated inputevents itemid; check prescriptions/emar."
+    is_ambiguous: false
+
+  # --- Hypotension action families (vasopressors) ---
+
+  - canonical_name: norepinephrine
+    description: "Norepinephrine vasopressor."
+    source_tables: [inputevents]
+    raw_itemids: [221906]
+    raw_labels:
+      - "Norepinephrine"
+      - "Levophed*"
+    canonical_unit: "mcg/kg/min"
+    conversions:
+      - from_unit: "mcg/min"
+        factor: 1.0
+    ambiguity_notes:
+      - "Rate may be recorded as mcg/min or mcg/kg/min depending on charting practice."
+    is_ambiguous: false
+
+  - canonical_name: vasopressin
+    description: "Vasopressin infusion."
+    source_tables: [inputevents]
+    raw_itemids: [222315]
+    raw_labels:
+      - "Vasopressin"
+    canonical_unit: "units/min"
+    conversions: []
+    ambiguity_notes: []
+    is_ambiguous: false
+
+  - canonical_name: epinephrine
+    description: "Epinephrine vasopressor."
+    source_tables: [inputevents]
+    raw_itemids: [221289]
+    raw_labels:
+      - "Epinephrine"
+      - "Adrenaline*"
+    canonical_unit: "mcg/kg/min"
+    conversions: []
+    ambiguity_notes: []
+    is_ambiguous: false
+
+  - canonical_name: phenylephrine
+    description: "Phenylephrine vasopressor."
+    source_tables: [inputevents]
+    raw_itemids: [221749]
+    raw_labels:
+      - "Phenylephrine"
+      - "Neo-Synephrine*"
+    canonical_unit: "mcg/min"
+    conversions: []
+    ambiguity_notes: []
+    is_ambiguous: false
+
+  - canonical_name: dopamine
+    description: "Dopamine vasopressor/inotrope."
+    source_tables: [inputevents]
+    raw_itemids: [221662]
+    raw_labels:
+      - "Dopamine"
+    canonical_unit: "mcg/kg/min"
+    conversions: []
+    ambiguity_notes: []
+    is_ambiguous: false
+
+  # --- IV fluids ---
+
+  - canonical_name: crystalloid_bolus
+    description: "IV crystalloid fluid bolus for volume resuscitation."
+    source_tables: [inputevents]
+    raw_itemids: [225158, 225828, 225159]
+    raw_labels:
+      - "NaCl 0.9*"
+      - "Normal Saline*"
+      - "Lactated Ringer*"
+      - "LR*"
+      - "NaCl 0.45*"
+    canonical_unit: "mL"
+    conversions: []
+    ambiguity_notes:
+      - "Must distinguish bolus from maintenance infusion using rate/ordercategoryname fields."
+      - "Bolus typically >= 250 mL in <= 30 min or labeled 'Bolus' in ordercategoryname."
+    is_ambiguous: true

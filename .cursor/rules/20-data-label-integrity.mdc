@@ -26,6 +26,7 @@ Apply when editing data ingestion, normalization, timeline, label generation, sp
 - Leakage tests (future access attempts fail).
 - Schema stability tests for core benchmark artifacts.
 - Split safety tests proving patient-level leakage prevention.
+- Real-data integration tests must not silently skip when real MIMIC data is present on disk (e.g., repo-local `physionet.org/files/mimiciv/<version>/`). Prefer auto-discovery over “env var required” gating.
 
 ## Change Discipline
 - If episode semantics, trigger logic, or action mapping changes:

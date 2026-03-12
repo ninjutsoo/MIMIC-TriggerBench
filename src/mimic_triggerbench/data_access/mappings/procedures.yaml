@@ -1,0 +1,37 @@
+name: procedures
+version: "v0.1"
+description: >
+  Canonical procedure mappings for benchmark action families.
+  Source: MIMIC-IV procedureevents (d_items reference, MetaVision).
+
+entries:
+  - canonical_name: crrt
+    description: "Continuous renal replacement therapy initiation."
+    source_tables: [procedureevents]
+    raw_itemids: [225441, 225802, 225803, 225805, 225806, 225809, 225810]
+    raw_labels:
+      - "CRRT*"
+      - "Continuous Renal Replacement*"
+      - "CVVH*"
+      - "CVVHD*"
+      - "CVVHDF*"
+    canonical_unit: null
+    conversions: []
+    ambiguity_notes:
+      - "Multiple CRRT-related itemids exist for filter changes, output, access, etc."
+      - "For action labeling, use initiation/start events, not ongoing maintenance charting."
+    is_ambiguous: true
+
+  - canonical_name: hemodialysis
+    description: "Intermittent hemodialysis."
+    source_tables: [procedureevents]
+    raw_itemids: [225436]
+    raw_labels:
+      - "Hemodialysis"
+      - "Dialysis*"
+    canonical_unit: null
+    conversions: []
+    ambiguity_notes:
+      - "Distinguish from CRRT; HD is intermittent."
+      - "Some itemids may overlap with CRRT; verify against local d_items."
+    is_ambiguous: true

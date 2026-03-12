@@ -1,0 +1,72 @@
+name: labs
+version: "v0.1"
+description: >
+  Canonical lab mappings for benchmark trigger signals and supporting evidence.
+  Source: MIMIC-IV labevents (d_labitems reference, MIMIC-IV v2.x).
+
+entries:
+  - canonical_name: potassium
+    description: "Serum or whole-blood potassium."
+    source_tables: [labevents]
+    raw_itemids: [50971, 50822]
+    raw_labels:
+      - "Potassium"
+      - "Potassium, Whole Blood"
+    canonical_unit: "mmol/L"
+    conversions:
+      - from_unit: "mEq/L"
+        factor: 1.0
+    ambiguity_notes:
+      - "50971 is serum potassium; 50822 is whole-blood (blood gas). Both clinically valid."
+    is_ambiguous: false
+
+  - canonical_name: glucose
+    description: "Serum or whole-blood glucose."
+    source_tables: [labevents]
+    raw_itemids: [50931, 50809]
+    raw_labels:
+      - "Glucose"
+      - "Glucose, Whole Blood"
+    canonical_unit: "mg/dL"
+    conversions:
+      - from_unit: "mmol/L"
+        factor: 18.016
+    ambiguity_notes:
+      - "50931 is serum glucose; 50809 is blood-gas/POC glucose. POC values may differ slightly."
+    is_ambiguous: false
+
+  - canonical_name: creatinine
+    description: "Serum creatinine for renal function context."
+    source_tables: [labevents]
+    raw_itemids: [50912]
+    raw_labels:
+      - "Creatinine"
+    canonical_unit: "mg/dL"
+    conversions:
+      - from_unit: "umol/L"
+        factor: 0.0113
+    ambiguity_notes: []
+    is_ambiguous: false
+
+  - canonical_name: bun
+    description: "Blood urea nitrogen."
+    source_tables: [labevents]
+    raw_itemids: [51006]
+    raw_labels:
+      - "Urea Nitrogen"
+    canonical_unit: "mg/dL"
+    conversions: []
+    ambiguity_notes:
+      - "MIMIC labels this 'Urea Nitrogen', not 'BUN'."
+    is_ambiguous: false
+
+  - canonical_name: lactate
+    description: "Blood lactate for perfusion context."
+    source_tables: [labevents]
+    raw_itemids: [50813]
+    raw_labels:
+      - "Lactate"
+    canonical_unit: "mmol/L"
+    conversions: []
+    ambiguity_notes: []
+    is_ambiguous: false
