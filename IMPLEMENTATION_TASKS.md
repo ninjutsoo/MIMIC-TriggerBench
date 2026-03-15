@@ -15,7 +15,7 @@ Do not skip phases. The project will fail if labels, leakage control, or event n
 
 ---
 
-# Phase 0. Scope lock and project rules
+# Phase 0. Scope lock and project rules [DONE]
 
 ## Objective
 Freeze a narrow, paper-worthy scope before coding expands into a generic ICU copilot.
@@ -55,7 +55,7 @@ Create the initial repository structure for a benchmark-first medical agent proj
 
 ---
 
-# Phase 1. Local environment and dataset access
+# Phase 1. Local environment and dataset access [DONE]
 
 ## Objective
 Make the offline MIMIC-IV and MIMIC-IV-Note data queryable on your machine.
@@ -123,7 +123,7 @@ Build a data access layer for local offline MIMIC-IV and optional MIMIC-IV-Note 
 
 ---
 
-# Phase 2. Clinical task specification and trigger definitions
+# Phase 2. Clinical task specification and trigger definitions [DONE]
 
 ## Objective
 Define clinically defensible triggers and action windows before label generation.
@@ -225,7 +225,7 @@ Create versioned task-spec YAML files for hyperkalemia, hypoglycemia, and sustai
 
 ---
 
-# Phase 3. Event normalization and codebooks
+# Phase 3. Event normalization and codebooks [DONE]
 
 ## Objective
 Map raw MIMIC item names and medication names into normalized concepts used for triggers and actions.
@@ -320,7 +320,7 @@ Build normalization pipelines and codebooks for labs, hemodynamics, medications,
 
 ---
 
-# Phase 3.5. Action extraction feasibility checkpoint
+# Phase 3.5. Action extraction feasibility checkpoint [DONE]
 
 ## Objective
 Confirm that normalized events are rich enough to reliably detect the action patterns that define gold labels before proceeding to episode and label generation.
@@ -374,7 +374,7 @@ Using the normalized codebooks and pipelines from Phase 3, build deterministic d
 
 ---
 
-# Phase 4. Canonical timeline construction
+# Phase 4. Canonical timeline construction [DONE]
 
 ## Objective
 Create a single time-ordered timeline representation per ICU stay.

@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Optional
 
 import pandas as pd
-from sqlalchemy import create_engine
 
 from mimic_triggerbench.config import Settings, DataBackend
 from mimic_triggerbench.mimic_tables import TABLE_SPECS, TableSpec, resolve_table_path
@@ -24,10 +23,13 @@ def _validate_table_schema(df: pd.DataFrame, spec: TableSpec, table_name: str, s
         )
 
 
-def load_table_dataframe(settings: Settings, table: str) -> pd.DataFrame:
+def load_table_dataframe(
+    settings: Settings, table: str, *, nrows: Optional[int] = None
+) -> pd.DataFrame:
     """Load a required MIMIC-IV table into a pandas DataFrame.
 
     Phase 1 helper to make raw tables programmatically accessible.
+    Optional nrows limits rows read (for faster integration tests on real data).
     """
     table = table.lower()
     spec = TABLE_SPECS.get(table)
@@ -46,14 +48,19 @@ def load_table_dataframe(settings: Settings, table: str) -> pd.DataFrame:
             )
         if resolved.file_format == "parquet":
             df = pd.read_parquet(resolved.path)
+            if nrows is not None:
+                df = df.head(nrows)
         else:
-            df = pd.read_csv(resolved.path, compression="infer")
+            df = pd.read_csv(resolved.path, compression="infer", nrows=nrows)
         _validate_table_schema(df, spec, table, str(resolved.path))
         return df
 
     if settings.backend == DataBackend.POSTGRES:
         if not settings.postgres_dsn:
             raise ValueError("postgres_dsn must be set for postgres backend.")
+        # Lazy import: avoid slow SQLAlchemy import on some Windows setups.
+        from sqlalchemy import create_engine
+
         engine = create_engine(settings.postgres_dsn)
         # We don't enforce schema name here; callers can fully qualify if needed.
         df = pd.read_sql_table(table, con=engine)

@@ -14,9 +14,9 @@ alwaysApply: true
 ### Step 0 — detect a learning signal
 
 A **learning signal** is present if the user message contains any of:
-- A direct correction: “don’t do X”, “do Y instead”, “you missed X”, “stop doing X”, “I don’t want you to…”
-- A complaint about assistant behavior: “this is wrong”, “you keep doing X”, “it’s not getting updated”, “why aren’t you…”
-- A repeated preference + mismatch: the user restates a preference that was already stated earlier because it wasn’t followed.
+- A direct correction: "don't do X", "do Y instead", "you missed X", "stop doing X", "I don't want you to…"
+- A complaint about assistant behavior: "this is wrong", "you keep doing X", "it's not getting updated", "why aren't you…"
+- A repeated preference + mismatch: the user restates a preference that was already stated earlier because it wasn't followed.
 
 If **no learning signal**, do not change rules.
 
@@ -27,7 +27,7 @@ Choose exactly one:
 - `unclear`: a rule exists but is ambiguous or underspecified (weak triggers, vague wording).
 - `conflicting`: two rules would lead to different behavior in the same situation.
 - `outdated`: rule no longer matches current project reality.
-- `not followed`: rule exists and is clear, but the assistant didn’t comply.
+- `not followed`: rule exists and is clear, but the assistant didn't comply.
 - `not a rules problem`: user is asking for a one-off or subjective change that should not become a persistent rule.
 
 ### Step 2 — patch rules immediately (default behavior)
@@ -48,9 +48,11 @@ After any rule edit, include a short section (1–3 bullets) in the user-visible
 
 ### Guardrails (must not learn the wrong thing)
 - Never relax or contradict project invariants in `.cursor/rules/10-project-invariants.mdc`.
-- Don’t “learn” one-off preferences that are unlikely to recur.
-- Don’t create new top-level docs/files as part of learning unless an existing project plan explicitly requires it.
+- Don't "learn" one-off preferences that are unlikely to recur.
+- Don't create new top-level docs/files as part of learning unless an existing project plan explicitly requires it.
+- Never create new `.mdc` rule files — always merge into the most relevant existing rule file.
 
 ## Rules: 
-- Prefer minimal, necessary files and docs. Do not add new `.md` or other top-level files unless they are explicitly required by the project plan or clearly support an existing phase (e.g., an inventory doc that is referenced in IMPLEMENTATION_TASKS.md).
+- Prefer minimal, necessary files and docs. Do not add new `.md`, `.mdc`, or other files unless explicitly required by the project plan.
+- After a phase or subphase in `IMPLEMENTATION_TASKS.md` is fully implemented and has passing tests, append a small `[DONE]` marker to that phase heading so future sessions know where to resume.
 - Do not edit `.cursor/plans/*.plan.md` files unless the user explicitly asks to update the plan itself (implementation should not mutate the approved plan artifact).

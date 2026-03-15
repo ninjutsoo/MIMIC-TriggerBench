@@ -2,16 +2,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Optional, Sequence
+from typing import TYPE_CHECKING, Iterable, List, Optional, Sequence
 
 import pandas as pd
 import pyarrow.parquet as pq
 from rich.console import Console
 from rich.table import Table
 
-from sqlalchemy import text
-from sqlalchemy.engine import Engine
-from sqlalchemy import create_engine
+if TYPE_CHECKING:  # pragma: no cover
+    from sqlalchemy.engine import Engine
 
 from mimic_triggerbench.config import Settings, DataBackend
 from mimic_triggerbench.mimic_tables import (
@@ -86,8 +85,10 @@ def _required_postgres_tables() -> List[str]:
     return list(TABLE_SPECS.keys())
 
 
-def _postgres_table_exists(engine: Engine, table_name: str, schemas: Sequence[str]) -> Optional[str]:
+def _postgres_table_exists(engine: "Engine", table_name: str, schemas: Sequence[str]) -> Optional[str]:
     """Return schema name if found, else None."""
+    from sqlalchemy import text
+
     q = text(
         """
         SELECT table_schema
@@ -102,7 +103,9 @@ def _postgres_table_exists(engine: Engine, table_name: str, schemas: Sequence[st
     return row[0] if row else None
 
 
-def _postgres_table_columns(engine: Engine, table_name: str, schema: str) -> list[str]:
+def _postgres_table_columns(engine: "Engine", table_name: str, schema: str) -> list[str]:
+    from sqlalchemy import text
+
     q = text(
         """
         SELECT column_name
@@ -118,6 +121,10 @@ def _postgres_table_columns(engine: Engine, table_name: str, schema: str) -> lis
 
 
 def _check_postgres(dsn: str) -> List[TableStatus]:
+    # Lazy import: SQLAlchemy import can be slow on some Windows setups due to
+    # platform/WMI queries during import. Only load it when Postgres backend is used.
+    from sqlalchemy import create_engine
+
     engine = create_engine(dsn)
     # Common schema names people use for MIMIC-IV; include "public" as a fallback.
     candidate_schemas = ["mimiciv_icu", "mimiciv_hosp", "mimiciv_ed", "mimiciv_derived", "public"]

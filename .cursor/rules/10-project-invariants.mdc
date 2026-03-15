@@ -23,6 +23,12 @@ This repository is benchmark-first, agent-second.
 - Outputs must be strict, machine-scorable JSON (no vague free text).
 - Claims must stay benchmark-focused and avoid physician-equivalence or deployment claims.
 
+## File-creation discipline
+- Prefer editing existing files over creating new ones.
+- Every new file must be justified: it exists only when the module is large enough (>~150 lines of logic) or serves a clearly distinct responsibility that would clutter its neighbor.
+- Small helpers (<~100 lines), single-function utilities, and thin wrappers should be merged into the closest related module instead of getting their own file.
+- Before creating a new package directory, confirm the contents will span at least 2 non-trivial modules beyond `__init__.py`.
+
 ## Enforcement
 - If a requested change violates these invariants, narrow or rewrite the change so the invariants hold.
 - Prefer reproducible benchmark fidelity over feature expansion.

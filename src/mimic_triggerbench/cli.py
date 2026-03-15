@@ -17,6 +17,14 @@ from mimic_triggerbench.data_access import (
     mapping_ledger_path,
     reconcile_mapping_ledger,
 )
+from mimic_triggerbench.timeline import (
+    build_all_timelines,
+    write_timeline_parquet,
+)
+from mimic_triggerbench.feasibility import (
+    run_feasibility_checkpoint,
+    write_feasibility_reports,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -67,6 +75,59 @@ def build_parser() -> argparse.ArgumentParser:
         default=str(mapping_ledger_path()),
         help="Path to mapping_ledger.csv (default: project mapping ledger).",
     )
+
+    tl = sub.add_parser(
+        "build-timeline",
+        help="Build canonical timelines from normalized MIMIC-IV events (Phase 4).",
+    )
+    tl.add_argument("--dotenv", default=".env", help="Path to .env file (default: .env).")
+    tl.add_argument(
+        "--out",
+        default="output/timelines",
+        help="Output directory for timeline Parquet files (default: output/timelines).",
+    )
+    tl.add_argument(
+        "--max-stays",
+        type=int,
+        default=None,
+        help="Limit number of ICU stays to process (default: all).",
+    )
+    tl.add_argument(
+        "--stay-ids",
+        type=str,
+        default=None,
+        help="Comma-separated list of stay_ids to process.",
+    )
+    tl.add_argument(
+        "--partition",
+        action="store_true",
+        default=False,
+        help="Partition output Parquet by stay_id.",
+    )
+
+    fc = sub.add_parser(
+        "feasibility-check",
+        help="Run action extraction feasibility checkpoint (Phase 3.5).",
+    )
+    fc.add_argument("--dotenv", default=".env", help="Path to .env file (default: .env).")
+    fc.add_argument(
+        "--out",
+        default="output/feasibility",
+        help="Output directory for feasibility reports (default: output/feasibility).",
+    )
+    fc.add_argument(
+        "--max-stays",
+        type=int,
+        default=None,
+        help="Limit number of ICU stays to process (default: all).",
+    )
+    fc.add_argument(
+        "--review-n",
+        type=int,
+        default=25,
+        help="Number of detections to sample per action family for review (default: 25).",
+    )
+
     return p
 
 
@@ -124,6 +185,50 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         except Exception as e:  # noqa: BLE001 - CLI boundary
             console.print(f"[red]Mapping ledger check failed:[/red] {e}")
+            return 2
+
+    if args.command == "build-timeline":
+        try:
+            settings = load_settings(args.dotenv)
+            out_dir = Path(args.out)
+            stay_ids = None
+            if args.stay_ids:
+                stay_ids = [int(s.strip()) for s in args.stay_ids.split(",")]
+            timelines, stats = build_all_timelines(
+                settings,
+                stay_ids=stay_ids,
+                max_stays=args.max_stays,
+            )
+            partition_cols = ["stay_id"] if args.partition else None
+            write_timeline_parquet(timelines, out_dir, partition_cols=partition_cols)
+            console.print(f"[green]Built timelines:[/green] {stats.summary()}")
+            console.print(f"[green]Output written to[/green] {out_dir}")
+            return 0
+        except Exception as e:  # noqa: BLE001 - CLI boundary
+            console.print(f"[red]Timeline build failed:[/red] {e}")
+            return 2
+
+    if args.command == "feasibility-check":
+        try:
+            settings = load_settings(args.dotenv)
+            out_dir = Path(args.out)
+            timelines, _stats = build_all_timelines(
+                settings, max_stays=args.max_stays,
+            )
+            decisions, review_sets = run_feasibility_checkpoint(
+                timelines, review_sample_n=args.review_n,
+            )
+            write_feasibility_reports(decisions, review_sets, out_dir)
+            for d in decisions:
+                gate = "[green]PASS[/green]" if d.passed else "[red]FAIL[/red]"
+                console.print(
+                    f"  {d.action_family}: {d.stats.detected_events} events, "
+                    f"{d.stats.unique_stays} stays → {gate}"
+                )
+            console.print(f"[green]Reports written to[/green] {out_dir}")
+            return 0
+        except Exception as e:  # noqa: BLE001 - CLI boundary
+            console.print(f"[red]Feasibility check failed:[/red] {e}")
             return 2
 
     console.print("[red]Unknown command[/red]")
