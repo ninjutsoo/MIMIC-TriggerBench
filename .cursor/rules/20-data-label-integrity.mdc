@@ -21,12 +21,14 @@ Apply when editing data ingestion, normalization, timeline, label generation, sp
   - observed clinician actions
   - protocol-derived gold actions
 - Fail loudly on ambiguous mappings or timestamps; no silent fallback/default mapping.
+- For **sustained-condition triggers** (e.g. hypotension sustained MAP < 65 for 15 minutes), treat label validity as potentially sensitive to **measurement frequency**. If using “consecutive readings” or “unbroken tail” logic, add validation that the signal is sampled densely enough (or explicitly encode a minimum sampling density / maximum allowed gaps) and reflect this in tests and audit outputs.
 
 ## Required Tests
 - Leakage tests (future access attempts fail).
 - Schema stability tests for core benchmark artifacts.
 - Split safety tests proving patient-level leakage prevention.
 - Real-data integration tests must not silently skip when real MIMIC data is present on disk (e.g., repo-local `physionet.org/files/mimiciv/<version>/`). Prefer auto-discovery over “env var required” gating.
+- When completing a new phase, extend the real-data end-to-end integration test to exercise that phase’s new public contract (even if only as a minimal “smoke gate” using real episodes/timelines).
 
 ## Change Discipline
 - If episode semantics, trigger logic, or action mapping changes:

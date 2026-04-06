@@ -431,7 +431,7 @@ Implement a canonical timeline builder that merges normalized events from requir
 
 ---
 
-# Phase 5. Deterministic label generation
+# Phase 5. Deterministic label generation [DONE]
 
 ## Objective
 Generate benchmark episodes and labels with no future leakage.
@@ -499,7 +499,7 @@ Ensure that any future-looking logic used only for defining negative windows is 
 
 ---
 
-# Phase 6. Train/validation/test splitting
+# Phase 6. Train/validation/test splitting [DONE]
 
 ## Objective
 Create reliable benchmark splits that prevent leakage across patient or stay.
@@ -525,7 +525,7 @@ Build deterministic train/validation/test split generation for benchmark episode
 
 ---
 
-# Phase 6.5. Output schemas and runner validation gate
+# Phase 6.5. Output schemas and runner validation gate [DONE]
 
 ## Objective
 Freeze the final benchmark output schema and wire strict validation into all runners **before** building replay tools, baselines, or the agent.
@@ -577,7 +577,7 @@ Define pydantic schemas for all benchmark inputs, intermediate states, tool resu
 
 ---
 
-# Phase 7. Replay environment and structured tools
+# Phase 7. Replay environment and structured tools [DONE]
 
 ## Objective
 Create the environment the agent will interact with.

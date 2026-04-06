@@ -1,0 +1,281 @@
+{
+  "timings_sec": {
+    "load_icustays": 0.1325,
+    "inventory_report": 0.105,
+    "normalization_coverage": 2.733,
+    "build_timelines": 0.5628,
+    "feasibility_checkpoint": 0.0005,
+    "episode_generation": 0.0095,
+    "splitting": 0.0021
+  },
+  "inputs": {
+    "backend": "files",
+    "mimic_root": "C:\\Users\\mrosh\\OneDrive\\Documents\\GitHub\\MIMIC-TriggerBench\\physionet.org\\files\\mimiciv\\3.1",
+    "required_tables": [
+      "icustays",
+      "chartevents",
+      "inputevents",
+      "outputevents",
+      "procedureevents",
+      "admissions",
+      "patients",
+      "labevents",
+      "prescriptions",
+      "emar",
+      "pharmacy",
+      "transfers",
+      "diagnoses_icd"
+    ],
+    "resolved_paths": {
+      "icustays": "C:\\Users\\mrosh\\OneDrive\\Documents\\GitHub\\MIMIC-TriggerBench\\physionet.org\\files\\mimiciv\\3.1\\icu\\icustays.csv.gz",
+      "chartevents": "C:\\Users\\mrosh\\OneDrive\\Documents\\GitHub\\MIMIC-TriggerBench\\physionet.org\\files\\mimiciv\\3.1\\icu\\chartevents.csv.gz",
+      "inputevents": "C:\\Users\\mrosh\\OneDrive\\Documents\\GitHub\\MIMIC-TriggerBench\\physionet.org\\files\\mimiciv\\3.1\\icu\\inputevents.csv.gz",
+      "outputevents": "C:\\Users\\mrosh\\OneDrive\\Documents\\GitHub\\MIMIC-TriggerBench\\physionet.org\\files\\mimiciv\\3.1\\icu\\outputevents.csv.gz",
+      "procedureevents": "C:\\Users\\mrosh\\OneDrive\\Documents\\GitHub\\MIMIC-TriggerBench\\physionet.org\\files\\mimiciv\\3.1\\icu\\procedureevents.csv.gz",
+      "admissions": "C:\\Users\\mrosh\\OneDrive\\Documents\\GitHub\\MIMIC-TriggerBench\\physionet.org\\files\\mimiciv\\3.1\\hosp\\admissions.csv.gz",
+      "patients": "C:\\Users\\mrosh\\OneDrive\\Documents\\GitHub\\MIMIC-TriggerBench\\physionet.org\\files\\mimiciv\\3.1\\hosp\\patients.csv.gz",
+      "labevents": "C:\\Users\\mrosh\\OneDrive\\Documents\\GitHub\\MIMIC-TriggerBench\\physionet.org\\files\\mimiciv\\3.1\\hosp\\labevents.csv.gz",
+      "prescriptions": "C:\\Users\\mrosh\\OneDrive\\Documents\\GitHub\\MIMIC-TriggerBench\\physionet.org\\files\\mimiciv\\3.1\\hosp\\prescriptions.csv.gz",
+      "emar": "C:\\Users\\mrosh\\OneDrive\\Documents\\GitHub\\MIMIC-TriggerBench\\physionet.org\\files\\mimiciv\\3.1\\hosp\\emar.csv.gz",
+      "pharmacy": "C:\\Users\\mrosh\\OneDrive\\Documents\\GitHub\\MIMIC-TriggerBench\\physionet.org\\files\\mimiciv\\3.1\\hosp\\pharmacy.csv.gz",
+      "transfers": "C:\\Users\\mrosh\\OneDrive\\Documents\\GitHub\\MIMIC-TriggerBench\\physionet.org\\files\\mimiciv\\3.1\\hosp\\transfers.csv.gz",
+      "diagnoses_icd": "C:\\Users\\mrosh\\OneDrive\\Documents\\GitHub\\MIMIC-TriggerBench\\physionet.org\\files\\mimiciv\\3.1\\hosp\\diagnoses_icd.csv.gz"
+    },
+    "icustays_rows": 94458,
+    "icustays_columns": [
+      "subject_id",
+      "hadm_id",
+      "stay_id",
+      "first_careunit",
+      "last_careunit",
+      "intime",
+      "outtime",
+      "los"
+    ],
+    "sample_stays": [
+      39553978,
+      37081114,
+      39765666,
+      37067082,
+      34592300
+    ],
+    "max_rows_per_table": 25000,
+    "coverage_top_k": 10,
+    "step_timeout_s": 180
+  },
+  "inventory_file": "C:\\Users\\mrosh\\OneDrive\\Documents\\GitHub\\MIMIC-TriggerBench\\output\\test-runs\\phase_0_6_realdata\\test_implemented_phases_0_6_re0\\inventory.md",
+  "coverage": [
+    {
+      "table": "labevents",
+      "rows_scanned": 25000,
+      "mapped": 2878,
+      "unmapped": 22122,
+      "ambiguous": 0
+    },
+    {
+      "table": "chartevents",
+      "rows_scanned": 25000,
+      "mapped": 1382,
+      "unmapped": 23618,
+      "ambiguous": 0
+    },
+    {
+      "table": "inputevents",
+      "rows_scanned": 25000,
+      "mapped": 9613,
+      "unmapped": 15387,
+      "ambiguous": 3805
+    },
+    {
+      "table": "procedureevents",
+      "rows_scanned": 25000,
+      "mapped": 378,
+      "unmapped": 24622,
+      "ambiguous": 378
+    },
+    {
+      "table": "prescriptions",
+      "rows_scanned": 25000,
+      "mapped": 2286,
+      "unmapped": 22714,
+      "ambiguous": 815
+    },
+    {
+      "table": "emar",
+      "rows_scanned": 25000,
+      "mapped": 1495,
+      "unmapped": 22047,
+      "ambiguous": 348
+    }
+  ],
+  "timeline_stats": {
+    "total_events": 666,
+    "stays_built": 5,
+    "events_per_table": {
+      "chartevents": 498,
+      "labevents": 126,
+      "inputevents": 42
+    }
+  },
+  "timeline_per_stay": [
+    {
+      "stay_id": 39553978,
+      "event_count": 42,
+      "source_tables_seen": [
+        "labevents",
+        "chartevents"
+      ],
+      "categories_seen": [
+        "lab",
+        "vital"
+      ]
+    },
+    {
+      "stay_id": 37081114,
+      "event_count": 349,
+      "source_tables_seen": [
+        "labevents",
+        "chartevents",
+        "inputevents"
+      ],
+      "categories_seen": [
+        "med_infusion",
+        "med_bolus",
+        "lab",
+        "vital"
+      ]
+    },
+    {
+      "stay_id": 39765666,
+      "event_count": 66,
+      "source_tables_seen": [
+        "labevents",
+        "chartevents",
+        "inputevents"
+      ],
+      "categories_seen": [
+        "med_infusion",
+        "med_bolus",
+        "lab",
+        "vital"
+      ]
+    },
+    {
+      "stay_id": 37067082,
+      "event_count": 110,
+      "source_tables_seen": [
+        "labevents",
+        "chartevents",
+        "inputevents"
+      ],
+      "categories_seen": [
+        "med_infusion",
+        "vital",
+        "med_bolus",
+        "lab"
+      ]
+    },
+    {
+      "stay_id": 34592300,
+      "event_count": 99,
+      "source_tables_seen": [
+        "labevents",
+        "chartevents",
+        "inputevents"
+      ],
+      "categories_seen": [
+        "med_infusion",
+        "med_bolus",
+        "vital",
+        "lab"
+      ]
+    }
+  ],
+  "feasibility_decisions": [
+    {
+      "action_family": "dialysis_start",
+      "passed": false,
+      "detected_events": 0,
+      "unique_stays": 0,
+      "unique_patients": 0
+    },
+    {
+      "action_family": "fluid_bolus",
+      "passed": false,
+      "detected_events": 10,
+      "unique_stays": 4,
+      "unique_patients": 3
+    },
+    {
+      "action_family": "insulin_dextrose",
+      "passed": false,
+      "detected_events": 0,
+      "unique_stays": 0,
+      "unique_patients": 0
+    },
+    {
+      "action_family": "vasopressor_escalation",
+      "passed": false,
+      "detected_events": 0,
+      "unique_stays": 0,
+      "unique_patients": 0
+    },
+    {
+      "action_family": "vasopressor_start",
+      "passed": false,
+      "detected_events": 1,
+      "unique_stays": 1,
+      "unique_patients": 1
+    }
+  ],
+  "feasibility_review_set_sizes": {
+    "vasopressor_start": 1,
+    "fluid_bolus": 10
+  },
+  "episode_summary": {
+    "hyperkalemia": {
+      "total": 32,
+      "positive": 0,
+      "negative": 32,
+      "stays_with_episodes": 5
+    },
+    "hypoglycemia": {
+      "total": 31,
+      "positive": 0,
+      "negative": 31,
+      "stays_with_episodes": 5
+    },
+    "hypotension": {
+      "total": 99,
+      "positive": 6,
+      "negative": 93,
+      "stays_with_episodes": 5
+    }
+  },
+  "total_episodes": 162,
+  "split_summary": {
+    "seed": 42,
+    "patient_split_counts": {
+      "train": 1,
+      "val": 1,
+      "test": 2
+    },
+    "per_task_episode_counts": {
+      "hyperkalemia": {
+        "val": 12,
+        "train": 10,
+        "test": 10
+      },
+      "hypoglycemia": {
+        "val": 11,
+        "train": 10,
+        "test": 10
+      },
+      "hypotension": {
+        "train": 49,
+        "val": 37,
+        "test": 13
+      }
+    }
+  }
+}

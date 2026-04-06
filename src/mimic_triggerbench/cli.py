@@ -128,6 +128,69 @@ def build_parser() -> argparse.ArgumentParser:
         help="Number of detections to sample per action family for review (default: 25).",
     )
 
+    ep = sub.add_parser(
+        "generate-episodes",
+        help="Generate benchmark episodes from canonical timelines (Phase 5).",
+    )
+    ep.add_argument("--dotenv", default=".env", help="Path to .env file (default: .env).")
+    ep.add_argument(
+        "--timelines",
+        default="output/timelines",
+        help="Path to timeline Parquet file or directory (default: output/timelines).",
+    )
+    ep.add_argument(
+        "--out",
+        default="output/episodes",
+        help="Output directory for episode files (default: output/episodes).",
+    )
+    ep.add_argument(
+        "--tasks",
+        default=None,
+        help="Comma-separated task names to generate episodes for (default: all).",
+    )
+
+    sp = sub.add_parser(
+        "split-episodes",
+        help="Apply deterministic patient-level train/val/test splits to episodes (Phase 6).",
+    )
+    sp.add_argument(
+        "--episodes-dir",
+        default="output/episodes",
+        help="Directory containing episode Parquet files (default: output/episodes).",
+    )
+    sp.add_argument(
+        "--out",
+        default="output/splits",
+        help="Output directory for split manifests and stats (default: output/splits).",
+    )
+    sp.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="Random seed for split (default: 42).",
+    )
+    sp.add_argument(
+        "--train-frac",
+        type=float,
+        default=0.7,
+        help="Fraction of patients for train (default: 0.7).",
+    )
+    sp.add_argument(
+        "--val-frac",
+        type=float,
+        default=0.15,
+        help="Fraction of patients for validation (default: 0.15).",
+    )
+
+    vs = sub.add_parser(
+        "validate-schema",
+        help="Validate a JSON file against the frozen BenchmarkOutput schema (Phase 6.5).",
+    )
+    vs.add_argument(
+        "json_file",
+        help="Path to a JSON file containing a BenchmarkOutput payload (or JSON-lines of payloads).",
+    )
+
     return p
 
 
@@ -229,6 +292,115 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         except Exception as e:  # noqa: BLE001 - CLI boundary
             console.print(f"[red]Feasibility check failed:[/red] {e}")
+            return 2
+
+    if args.command == "generate-episodes":
+        try:
+            import json as _json
+
+            from mimic_triggerbench.labeling import (
+                load_all_task_specs,
+                generate_all_episodes,
+                episodes_to_records,
+            )
+            from mimic_triggerbench.timeline.io import read_timeline_parquet
+            import pandas as _pd
+
+            timelines = read_timeline_parquet(Path(args.timelines))
+            specs = load_all_task_specs()
+
+            task_names = list(specs.keys())
+            if args.tasks:
+                task_names = [t.strip() for t in args.tasks.split(",")]
+
+            out_dir = Path(args.out)
+            out_dir.mkdir(parents=True, exist_ok=True)
+
+            for task_name in task_names:
+                spec = specs[task_name]
+                episodes = generate_all_episodes(spec, timelines)
+                records = episodes_to_records(episodes)
+                if records:
+                    df = _pd.DataFrame.from_records(records)
+                    pq_path = out_dir / f"episodes_{task_name}.parquet"
+                    df.to_parquet(str(pq_path), index=False)
+                    jsonl_path = out_dir / f"episodes_{task_name}.jsonl"
+                    with jsonl_path.open("w", encoding="utf-8") as f:
+                        for r in records:
+                            f.write(_json.dumps(r, default=str) + "\n")
+                    console.print(
+                        f"  {task_name}: {len(episodes)} episodes "
+                        f"({sum(1 for e in episodes if e.trigger_label)} pos, "
+                        f"{sum(1 for e in episodes if not e.trigger_label)} neg)"
+                    )
+                else:
+                    console.print(f"  {task_name}: 0 episodes")
+            console.print(f"[green]Episodes written to[/green] {out_dir}")
+            return 0
+        except Exception as e:  # noqa: BLE001 - CLI boundary
+            console.print(f"[red]Episode generation failed:[/red] {e}")
+            return 2
+
+    if args.command == "split-episodes":
+        try:
+            from mimic_triggerbench.splitting import (
+                split_episodes_from_dir,
+                write_split_manifests,
+                write_split_stats,
+            )
+
+            out_dir = Path(args.out)
+            episodes_dir = Path(args.episodes_dir)
+            split_result = split_episodes_from_dir(
+                episodes_dir,
+                seed=args.seed,
+                train_frac=args.train_frac,
+                val_frac=args.val_frac,
+            )
+            write_split_manifests(split_result, out_dir)
+            write_split_stats(split_result, out_dir)
+            for task, counts in split_result.per_task_counts.items():
+                console.print(f"  {task}: {counts}")
+            console.print(f"[green]Split manifests written to[/green] {out_dir}")
+            return 0
+        except Exception as e:  # noqa: BLE001 - CLI boundary
+            console.print(f"[red]Split generation failed:[/red] {e}")
+            return 2
+
+    if args.command == "validate-schema":
+        try:
+            import json as _json
+
+            from mimic_triggerbench.schemas import validate_benchmark_output
+
+            json_path = Path(args.json_file)
+            text = json_path.read_text(encoding="utf-8")
+            payloads: list[dict] = []
+            if text.strip().startswith("["):
+                payloads = _json.loads(text)
+            elif text.strip().startswith("{"):
+                payloads = [_json.loads(text)]
+            else:
+                for line in text.strip().splitlines():
+                    stripped = line.strip()
+                    if stripped:
+                        payloads.append(_json.loads(stripped))
+
+            errors = 0
+            for i, payload in enumerate(payloads):
+                try:
+                    validate_benchmark_output(payload)
+                except Exception as ve:
+                    console.print(f"[red]Payload {i} invalid:[/red] {ve}")
+                    errors += 1
+
+            if errors:
+                console.print(f"[red]{errors}/{len(payloads)} payloads failed validation.[/red]")
+                return 2
+            console.print(f"[green]All {len(payloads)} payloads valid.[/green]")
+            return 0
+        except Exception as e:  # noqa: BLE001 - CLI boundary
+            console.print(f"[red]Schema validation failed:[/red] {e}")
             return 2
 
     console.print("[red]Unknown command[/red]")
