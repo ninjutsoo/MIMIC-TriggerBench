@@ -53,6 +53,10 @@ def load_settings(dotenv_path: str | Path | None = ".env") -> Settings:
     - MIMIC_ROOT
     - MIMIC_NOTE_ROOT (optional)
     - POSTGRES_DSN (for postgres backend)
+    - HF_HOME (optional): Hugging Face cache root (e.g. ``/data/Amin``); read by ``huggingface_hub``.
+    - TRIGGERBENCH_HF_MODEL_ID (optional): HF repo id for local LLM/RAG baselines.
+    - TRIGGERBENCH_CUDA_DEVICE (optional): e.g. ``cuda:0`` for single-GPU runs.
+    - TRIGGERBENCH_RUN_HF_TESTS: set to ``1`` to run GPU HF baseline tests and real-data LLM/RAG sections.
     """
     if dotenv_path is not None and Path(dotenv_path).exists():
         load_dotenv(dotenv_path=dotenv_path)

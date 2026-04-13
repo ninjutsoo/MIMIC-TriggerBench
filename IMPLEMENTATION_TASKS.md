@@ -618,7 +618,7 @@ Implement a replay environment with structured JSON-returning tools for labs, vi
 
 ---
 
-# Phase 8. Baselines before agent
+# Phase 8. Baselines before agent [DONE]
 
 ## Objective
 Build strong non-agent baselines before Gemini.
